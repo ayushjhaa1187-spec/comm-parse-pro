@@ -6,11 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
+import AppLayout from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
-import Upload from "./pages/Upload";
-import BrdGenerate from "./pages/BrdGenerate";
-import BrdList from "./pages/BrdList";
-import Metrics from "./pages/Metrics";
+import UploadPage from "./pages/UploadPage";
+import BrdGenerationPage from "./pages/BrdGenerationPage";
+import MetricsPage from "./pages/MetricsPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -24,16 +24,26 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
-          <Route path="/dashboard/brds" element={<ProtectedRoute><BrdList /></ProtectedRoute>} />
-          <Route path="/dashboard/brds/generate/:projectId" element={<ProtectedRoute><BrdGenerate /></ProtectedRoute>} />
-          <Route path="/dashboard/brds/:id" element={<ProtectedRoute><BrdGenerate /></ProtectedRoute>} />
-          <Route path="/dashboard/metrics" element={<ProtectedRoute><Metrics /></ProtectedRoute>} />
-          <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+
+          {/* Protected Dashboard Routes with AppLayout */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/upload" element={<UploadPage />} />
+            <Route path="/dashboard/brds" element={<BrdGenerationPage />} />
+            <Route path="/dashboard/metrics" element={<MetricsPage />} />
+            <Route path="/dashboard/settings" element={<SettingsPage />} />
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
