@@ -6,7 +6,7 @@ import { FileText, Activity, Target, Clock, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import DashboardLayout from "@/components/DashboardLayout";
+import { CardSkeleton, TableRowSkeleton } from "@/components/SkeletonLoader";
 
 interface BrdRow {
   id: string;
@@ -21,11 +21,12 @@ export default function Dashboard() {
   const [brds, setBrds] = useState<BrdRow[]>([]);
   const [projectCount, setProjectCount] = useState(0);
   const [docCount, setDocCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setLoading(false); return; }
 
       const [b, p, d] = await Promise.all([
         supabase.from("brds").select("id, content, accuracy, status, created_at, projects(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
@@ -35,6 +36,7 @@ export default function Dashboard() {
       setBrds((b.data as unknown as BrdRow[]) || []);
       setProjectCount(p.count || 0);
       setDocCount(d.count || 0);
+      setLoading(false);
     };
     load();
   }, []);
@@ -52,73 +54,84 @@ export default function Dashboard() {
     : "—";
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6 max-w-6xl">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Monitor your AI requirement intelligence pipeline</p>
-        </div>
+    <div className="space-y-6 max-w-6xl">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">Monitor your communication analysis pipeline</p>
+      </div>
 
+      {/* Stats */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+      ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total BRDs" value={brds.length} icon={FileText} trend="+12%" trendUp />
           <StatCard label="Active Pipelines" value={projectCount} icon={Activity} />
           <StatCard label="Avg Accuracy" value={`${avgAccuracy}%`} icon={Target} trend="+2.1%" trendUp />
           <StatCard label="Docs Processed" value={docCount > 1000 ? `${(docCount / 1000).toFixed(0)}K` : docCount} icon={Clock} />
         </div>
+      )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-foreground">Recent BRDs</h2>
-              <Link to="/dashboard/brds" className="text-xs text-primary font-medium hover:underline">View all</Link>
-            </div>
-            {brds.length === 0 ? (
-              <div className="py-10 text-center text-muted-foreground text-sm">
-                No BRDs yet. <Link to="/dashboard/upload" className="text-primary hover:underline">Upload data to get started</Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {brds.map((brd) => (
-                  <div key={brd.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                    <div>
-                      <span className="text-sm font-medium text-foreground">{brd.projects?.name || "Untitled"}</span>
-                      <div className="text-xs text-muted-foreground mt-0.5">{new Date(brd.created_at).toLocaleDateString()}</div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {brd.accuracy && <span className="text-sm font-mono font-medium text-foreground">{brd.accuracy}%</span>}
-                      <Badge variant={brd.status === "completed" ? "default" : "secondary"}>
-                        {brd.status}
-                      </Badge>
-                      <Link to={`/dashboard/brds/${brd.id}`}>
-                        <Eye className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent BRDs */}
+        <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-foreground">Recent BRDs</h2>
+            <Link to="/dashboard/brds" className="text-xs text-primary font-medium hover:underline">View all</Link>
           </div>
-
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h2 className="text-base font-semibold text-foreground mb-4">Active Pipeline</h2>
-            <div className="space-y-4">
-              <PipelineStepper steps={activePipeline} />
-              <div className="mt-4">
-                <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-                  <span>Entity Extraction</span>
-                  <span>67%</span>
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => <TableRowSkeleton key={i} />)}
+            </div>
+          ) : brds.length === 0 ? (
+            <div className="py-10 text-center text-muted-foreground text-sm">
+              No BRDs yet. <Link to="/dashboard/upload" className="text-primary hover:underline">Upload data to get started</Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {brds.map((brd) => (
+                <div key={brd.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <div>
+                    <span className="text-sm font-medium text-foreground">{brd.projects?.name || "Untitled"}</span>
+                    <div className="text-xs text-muted-foreground mt-0.5">{new Date(brd.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {brd.accuracy && <span className="text-sm font-mono font-medium text-foreground">{brd.accuracy}%</span>}
+                    <Badge variant={brd.status === "completed" ? "default" : "secondary"}>
+                      {brd.status}
+                    </Badge>
+                    <Link to={`/dashboard/brds/${brd.id}`}>
+                      <Eye className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                    </Link>
+                  </div>
                 </div>
-                <Progress value={67} className="h-2" />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Active Pipeline */}
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h2 className="text-base font-semibold text-foreground mb-4">Active Pipeline</h2>
+          <div className="space-y-4">
+            <PipelineStepper steps={activePipeline} />
+            <div className="mt-4">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                <span>Entity Extraction</span>
+                <span>67%</span>
               </div>
-              <div className="pt-3 border-t border-border space-y-2 text-xs text-muted-foreground">
-                <div className="flex justify-between"><span>Queue status</span><span className="text-success font-medium">Active</span></div>
-                <div className="flex justify-between"><span>Worker status</span><span className="text-success font-medium">Online</span></div>
-                <div className="flex justify-between"><span>Avg processing time</span><span className="font-medium text-foreground">2.4s</span></div>
-              </div>
+              <Progress value={67} className="h-2" />
+            </div>
+            <div className="pt-3 border-t border-border space-y-2 text-xs text-muted-foreground">
+              <div className="flex justify-between"><span>Queue status</span><span className="text-success font-medium">Active</span></div>
+              <div className="flex justify-between"><span>Worker status</span><span className="text-success font-medium">Online</span></div>
+              <div className="flex justify-between"><span>Avg processing time</span><span className="font-medium text-foreground">2.4s</span></div>
             </div>
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

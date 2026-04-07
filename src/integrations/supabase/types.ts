@@ -7,13 +7,52 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
+      analysis_results: {
+        Row: {
+          id: string
+          user_id: string
+          document_id: string
+          analysis_type: string
+          results: Json
+          summary: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          document_id: string
+          analysis_type?: string
+          results?: Json
+          summary?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          document_id?: string
+          analysis_type?: string
+          results?: Json
+          summary?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_results_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "parsed_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brds: {
         Row: {
           accuracy: number | null
@@ -63,6 +102,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chat_history: {
+        Row: {
+          id: string
+          user_id: string
+          role: string
+          content: string
+          session_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: string
+          content: string
+          session_id?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: string
+          content?: string
+          session_id?: string
+          created_at?: string
+        }
+        Relationships: []
       }
       documents: {
         Row: {
@@ -143,6 +209,42 @@ export type Database = {
           },
         ]
       }
+      parsed_documents: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          content: string | null
+          source_type: string
+          parsed_data: Json
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          content?: string | null
+          source_type?: string
+          parsed_data?: Json
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          content?: string | null
+          source_type?: string
+          parsed_data?: Json
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pipeline_logs: {
         Row: {
           created_at: string
@@ -180,6 +282,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          id: string
+          email: string | null
+          full_name: string | null
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       projects: {
         Row: {

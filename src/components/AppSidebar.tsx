@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Upload, FileText, BarChart3, Settings, Hexagon } from "lucide-react";
+import { LayoutDashboard, Upload, FileText, BarChart3, Settings, Zap, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/dashboard/upload", label: "Upload", icon: Upload },
   { to: "/dashboard/brds", label: "BRDs", icon: FileText },
+  { to: "/dashboard/chat", label: "AI Chat", icon: MessageSquare },
   { to: "/dashboard/metrics", label: "Metrics", icon: BarChart3 },
   { to: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
@@ -17,10 +18,10 @@ const AppSidebar = () => {
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-[220px] flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
-          <Hexagon className="h-4 w-4 text-sidebar-primary-foreground" />
+          <Zap className="h-4 w-4 text-sidebar-primary-foreground" />
         </div>
         <span className="text-base font-bold tracking-tight text-sidebar-primary-foreground">
-          BRD Agent
+          CommParse Pro
         </span>
       </div>
 
@@ -49,7 +50,7 @@ const AppSidebar = () => {
       </nav>
 
       <div className="px-5 py-4 text-xs text-sidebar-foreground/40">
-        InsightWeaver v1.0
+        CommParse Pro v1.0
       </div>
     </aside>
   );
